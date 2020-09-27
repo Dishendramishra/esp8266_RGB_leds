@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .center {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        .full-height {
+            height: 100%;
+        }
+
+        input {
+            background: linear-gradient(to right, #696e6e 0%, #696e6e 50%, #fff 50%, #fff 100%);
+            border: solid 1px #696e6e;
+            border-radius: 10px;
+            height: 100%;
+            width: 100%;
+            outline: none;
+            transition: background 450ms ease-in;
+            -webkit-appearance: none;
+        }
+    </style>
+</head>
+
+<body onload="javascript:init()">
+    <div class="full-height">
+        <table class="full-height center" width="80%">
+            <tr>
+                <td> <input id="red" type="range" value="127" min=0 max=255
+                        style="background: linear-gradient(to right, #ff6347 0%, #ff6347 50%, #fff 50%, #fff 100%);" />
+                </td>
+            </tr>
+            <tr>
+                <td> <input id="green" type="range" value="127" min=0 max=255
+                        style="background: linear-gradient(to right, #3cb371 0%, #3cb371 50%, #fff 50%, #fff 100%);" />
+                </td>
+            </tr>
+            <tr>
+                <td> <input id="blue" type="range" value="127" min=0 max=255
+                        style="background: linear-gradient(to right, #1e90ff 0%, #1e90ff 50%, #fff 50%, #fff 100%);" />
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" colspan="2">
+                    <div id="pellete"
+                        style="background-color:rgb(127,127,127); height: 100%; width: 100%; margin-left: auto; margin-right: auto;">
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+<script>
+
+    red = document.getElementById("red")
+    blue = document.getElementById("green")
+    green = document.getElementById("blue")
+
+
+    red.oninput = function () {
+        this.style.background = 'linear-gradient(to right, #ff6347 0%, #ff6347 ' + this.value / this.max * 100 + '%, #fff ' + this.value / this.max * 100 + '%, white 100%)'
+        generateColor();
+    };
+    blue.oninput = function () {
+        this.style.background = 'linear-gradient(to right, #3cb371 0%, #3cb371 ' + this.value / this.max * 100 + '%, #fff ' + this.value / this.max * 100 + '%, white 100%)'
+        generateColor();
+    };
+    green.oninput = function () {
+        this.style.background = 'linear-gradient(to right, #1e90ff 0%, #1e90ff ' + this.value / this.max * 100 + '%, #fff ' + this.value / this.max * 100 + '%, white 100%)'
+        generateColor();
+    };
+
+    var Socket;
+
+    Number.prototype.pad = function (size) {
+        var s = String(this);
+        while (s.length < (size || 2)) { s = "0" + s; }
+        return s;
+    }
+
+    function init() {
+        Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+        Socket.onmessage = function (event) {
+            console.log(event.data);
+        }
+    }
+
+    function generateColor() {
+        color = document.getElementById("pellete");
+        color.style.background = "rgb(" + parseInt((red.value)).pad(3) + "," + (parseInt(blue.value)).pad(3) + "," + (parseInt(green.value)).pad(3) + ")";
+        Socket.send(parseInt((red.value)).pad(3) + "" + (parseInt(blue.value)).pad(3) + "" + (parseInt(green.value)).pad(3));
+        console.log(parseInt((red.value)).pad(3) + "" + (parseInt(blue.value)).pad(3) + "" + (parseInt(green.value)).pad(3));
+    }
+</script>
+
+</html>
