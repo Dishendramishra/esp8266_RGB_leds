@@ -3,11 +3,43 @@
 
 <head>
     <style>
+        p {
+            font-size: 50px;
+            font-weight: bold;
+            background: -webkit-linear-gradient(92deg, #95d7e3, #eb76ff);
+            background-size: 50vw 50vw;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textAnimate 2s linear infinite alternate;
+        }
+
+        @keyframes textAnimate {
+            from {
+                filter: hue-rotate(0deg);
+                background-position-x: 0%;
+            }
+
+            to {
+                filter: hue-rotate(360deg);
+                background-position-x: 600vw;
+            }
+        }
+
         .center {
             width: auto;
             margin-left: auto;
             margin-right: auto;
         }
+
+        tr {
+            height: 20%;
+        }
+
+        td {
+            width: 50%;
+            text-align: center;
+        }
+
         html,
         body {
             height: 100%;
@@ -22,39 +54,45 @@
     <script>
         var Socket;
         function init() {
-            Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+            Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
             Socket.onmessage = function (event) {
                 console.log(event.data);
-            }
+            };
         }
-
+        function rainbow_effect(){
+            Socket.send("rainbow");
+        }
         function getColor(eid) {
             t = document.getElementById(eid);
             Socket.send(t.style.backgroundColor);
         }
-
     </script>
 </head>
 
 <body onload="javascript:init()">
     <div class="full-height">
-        <table border="1" class="full-height center" style="width:100%;">
-            <tr height="100">
-                <td id="Tomato" onclick="getColor('Tomato');" style="background-color:Tomato;"></td>
-                <td id="Orange" onclick="getColor('Orange');" style="background-color:Orange;"> </td>
+        <table border="1" class="full-height center" style="width: 100%">
+            <tr >
+                <td id="Tomato" onclick="getColor('Tomato');" style="background-color: Tomato"></td>
+                <td id="Orange" onclick="getColor('Orange');" style="background-color: Orange"></td>
             </tr>
-            <tr height="100">
-                <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color:DodgerBlue;"> </td>
-                <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color:MediumSeaGreen;">
+            <tr >
+                <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color: DodgerBlue"></td>
+                <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color: MediumSeaGreen">
                 </td>
             </tr>
-            <tr height="100">
-                <td id="Violet" onclick="getColor('Violet');" style="background-color:Violet;"> </td>
-                <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color:SlateBlue;"> </td>
+            <tr >
+                <td id="Violet" onclick="getColor('Violet');" style="background-color: Violet"></td>
+                <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color: SlateBlue"></td>
             </tr>
-            <tr height="100">
-                <td id="White" onclick="getColor('White');" style="background-color:White;"> </td>
-                <td id="Black" onclick="getColor('Black');" style="background-color:Black;"> </td>
+            <tr >
+                <td id="White" onclick="getColor('White');" style="background-color: White"></td>
+                <td id="Black" onclick="getColor('Black');" style="background-color: Black"></td>
+            </tr>
+            <tr >
+                <td id="rainbow" onclick="rainbow_effect();" colspan="2">
+                    <p>Rainbow</p>
+                </td>
             </tr>
         </table>
     </div>
