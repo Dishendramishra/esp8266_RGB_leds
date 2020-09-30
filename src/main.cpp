@@ -3,6 +3,7 @@
 #include <ESP8266WiFi.h>
 #include <WebSocketsServer.h>
 #include <ESP8266WebServer.h>
+#include <DNSServer.h>
 
 // Pattern types supported:
 enum  pattern { NONE, RAINBOW_CYCLE, THEATER_CHASE, COLOR_WIPE, SCANNER, FADE };
@@ -297,7 +298,11 @@ class NeoPatterns : public Adafruit_NeoPixel
     }
 };
 
-ESP8266WebServer server;
+
+const byte DNS_PORT = 53;
+IPAddress apIP(192, 168, 1, 1);
+DNSServer dnsServer;
+ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
 #define NUM_OF_LEDS 15
@@ -306,47 +311,23 @@ bool rainblow_flag = false;
 
 NeoPatterns LedStrip(15, 2, NEO_BRG + NEO_KHZ400, &LedStripComplete);
 
-char main[] PROGMEM = R"=====(<!DOCTYPE html><html><head> <style> .center { width: auto; margin-left: auto; margin-right: auto; } html, body { height: 100%; margin: 0; } .full-height { height: 100%; } </style> <script> var Socket; function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function (event) { console.log(event.data); } } function getColor(eid) { t = document.getElementById(eid); Socket.send(t.style.backgroundColor); } </script></head><body onload="javascript:init()"> <div class="full-height"> <table border="1" style="width:100%;" class="full-height"> <tr height="100"> <td id="Tomato" onclick="getColor('Tomato');" style="background-color:Tomato;"></td> <td id="Orange" onclick="getColor('Orange');" style="background-color:Orange;"> </td> </tr> <tr height="100"> <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color:DodgerBlue;"> </td> <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color:MediumSeaGreen;"> </td> </tr> <tr height="100"> <td id="Violet" onclick="getColor('Violet');" style="background-color:Violet;"> </td> <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color:SlateBlue;"> </td> </tr> <tr height="100"> <td id="White" onclick="getColor('White');" style="background-color:White;"> </td> <td id="Black" onclick="getColor('Black');" style="background-color:Black;"> </td> </tr> </table> </div></body></html>)=====";
+char main[] PROGMEM = R"=====(<!DOCTYPE html><html> <head> <style> .unselectable { font-size: 3vw; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; } .rainbow { /* height: 55px; */ background-color: red; /* For browsers that do not support gradients */ background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); } .center { width: auto; margin-left: auto; margin-right: auto; } tr { height: 20%; } td { border-radius: 20px; width: 50%; text-align: center; } html, body { height: 100%; margin: 0; } .full-height { height: 100%; } </style> <script> var Socket; function init() { Socket = new WebSocket("ws://" + window.location.hostname + ":81/"); Socket.onmessage = function (event) { console.log(event.data); }; } function rainbow_effect() { Socket.send("rainbow"); } function getColor(eid) { t = document.getElementById(eid); Socket.send(t.style.backgroundColor); } </script> </head> <body onload="javascript:init()"> <div class="full-height"> <table class="full-height center" style="width: 100%"> <tr> <td id="Tomato" onclick="getColor('Tomato');" style="background-color: Tomato"></td> <td id="Orange" onclick="getColor('Orange');" style="background-color: Orange"></td> </tr> <tr> <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color: DodgerBlue"></td> <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color: MediumSeaGreen"></td> </tr> <tr> <td id="Violet" onclick="getColor('Violet');" style="background-color: Violet"></td> <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color: SlateBlue"></td> </tr> <tr> <td id="White" onclick="getColor('White');" style="background-color: White; border: 2px solid;"></td> <td id="Black" onclick="getColor('Black');" style="background-color: Black"></td> </tr> <tr> <td class="rainbow" id="rainbow" onclick="rainbow_effect();"></td> <td onclick="function func(){window.location.assign('/slider')};func();" style="border: 2px solid;"> <p class="unselectable"> <span style="color:tomato">R</span><span style="color:mediumseagreen">G</span><span style="color:dodgerblue">B</span> Sliders</p> </td> </tr> </table> </div> </body></html>)=====";
 char slider[] PROGMEM = R"=====(<!DOCTYPE html>
 <html>
-
 <head>
     <style>
-        p {
-            font-size: 50px;
-            font-weight: bold;
-            background: -webkit-linear-gradient(92deg, #95d7e3, #eb76ff);
-            background-size: 50vw 50vw;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: textAnimate 2s linear infinite alternate;
+        .unselectable {
+            font-size: 3vw;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
-
-        @keyframes textAnimate {
-            from {
-                filter: hue-rotate(0deg);
-                background-position-x: 0%;
-            }
-
-            to {
-                filter: hue-rotate(360deg);
-                background-position-x: 600vw;
-            }
-        }
-
         .center {
-            width: auto;
             margin-left: auto;
             margin-right: auto;
-        }
-
-        tr {
-            height: 20%;
-        }
-
-        td {
-            width: 50%;
-            text-align: center;
         }
 
         html,
@@ -358,54 +339,99 @@ char slider[] PROGMEM = R"=====(<!DOCTYPE html>
         .full-height {
             height: 100%;
         }
-    </style>
 
-    <script>
-        var Socket;
-        function init() {
-            Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
-            Socket.onmessage = function (event) {
-                console.log(event.data);
-            };
+        td {
+            border-radius: 50px;
+            text-align: center;
         }
-        function rainbow_effect(){
-            Socket.send("rainbow");
+        
+        input {
+            background: linear-gradient(to right, #696e6e 0%, #696e6e 50%, #fff 50%, #fff 100%);
+            border: solid 1px #696e6e;
+            border-radius: 50px;
+            height: 100%;
+            width: 100%;
+            outline: none;
+            /* transition: background 450ms ease-in; */
+            -webkit-appearance: none;
         }
-        function getColor(eid) {
-            t = document.getElementById(eid);
-            Socket.send(t.style.backgroundColor);
-        }
-    </script>
+    </style>
 </head>
 
 <body onload="javascript:init()">
     <div class="full-height">
-        <table border="1" class="full-height center" style="width: 100%">
-            <tr >
-                <td id="Tomato" onclick="getColor('Tomato');" style="background-color: Tomato"></td>
-                <td id="Orange" onclick="getColor('Orange');" style="background-color: Orange"></td>
-            </tr>
-            <tr >
-                <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color: DodgerBlue"></td>
-                <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color: MediumSeaGreen">
+        <table class="full-height center" width="80%">
+            <tr>
+                <td colspan="2"> <input id="red" type="range" value="127" min=0 max=255
+                        style="background: linear-gradient(to right, #ff6347 0%, #ff6347 50%, #fff 50%, #fff 100%);" />
                 </td>
             </tr>
-            <tr >
-                <td id="Violet" onclick="getColor('Violet');" style="background-color: Violet"></td>
-                <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color: SlateBlue"></td>
+            <tr>
+                <td colspan="2"> <input id="green" type="range" value="127" min=0 max=255
+                        style="background: linear-gradient(to right, #3cb371 0%, #3cb371 50%, #fff 50%, #fff 100%);" />
+                </td>
             </tr>
-            <tr >
-                <td id="White" onclick="getColor('White');" style="background-color: White"></td>
-                <td id="Black" onclick="getColor('Black');" style="background-color: Black"></td>
+            <tr>
+                <td colspan="2"> <input id="blue" type="range" value="127" min=0 max=255
+                        style="background: linear-gradient(to right, #1e90ff 0%, #1e90ff 50%, #fff 50%, #fff 100%);" />
+                </td>
             </tr>
-            <tr >
-                <td id="rainbow" onclick="rainbow_effect();" colspan="2">
-                    <p>Rainbow</p>
+            <tr>
+                <td rowspan="2" style="width: 70%;">
+                    <div id="pellete"
+                        style="background-color:rgb(127,127,127); height: 100%; width: 100%; margin-left: auto; margin-right: auto; border-radius: 50px;">
+                    </div>
+                </td>
+                <td style="border: 1px solid;" rowspan="2" onclick="function func(){window.location.assign('/')};func();">
+                    <p class="unselectable">Home</p>
                 </td>
             </tr>
         </table>
     </div>
 </body>
+<script>
+
+    red = document.getElementById("red")
+    blue = document.getElementById("green")
+    green = document.getElementById("blue")
+
+
+    red.oninput = function () {
+        this.style.background = 'linear-gradient(to right, #ff6347 0%, #ff6347 ' + this.value / this.max * 100 + '%, #fff ' + this.value / this.max * 100 + '%, white 100%)'
+        generateColor();
+    };
+    blue.oninput = function () {
+        this.style.background = 'linear-gradient(to right, #3cb371 0%, #3cb371 ' + this.value / this.max * 100 + '%, #fff ' + this.value / this.max * 100 + '%, white 100%)'
+        generateColor();
+    };
+    green.oninput = function () {
+        this.style.background = 'linear-gradient(to right, #1e90ff 0%, #1e90ff ' + this.value / this.max * 100 + '%, #fff ' + this.value / this.max * 100 + '%, white 100%)'
+        generateColor();
+    };
+
+    var Socket;
+
+    Number.prototype.pad = function (size) {
+        var s = String(this);
+        while (s.length < (size || 2)) { s = "0" + s; }
+        return s;
+    }
+
+    function init() {
+        Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+        Socket.onmessage = function (event) {
+            console.log(event.data);
+        }
+    }
+
+    function generateColor() {
+        color = document.getElementById("pellete");
+        color.style.background = "rgb(" + parseInt((red.value)).pad(3) + "," + (parseInt(blue.value)).pad(3) + "," + (parseInt(green.value)).pad(3) + ")";
+        Socket.send(parseInt((red.value)).pad(3) + "" + (parseInt(blue.value)).pad(3) + "" + (parseInt(green.value)).pad(3));
+        console.log(parseInt((red.value)).pad(3) + "" + (parseInt(blue.value)).pad(3) + "" + (parseInt(green.value)).pad(3));
+    }
+</script>
+
 </html>)=====";
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
@@ -501,6 +527,8 @@ void setup()
     Serial.begin(115200);
     Serial.println();
 
+    WiFi.mode(WIFI_AP);
+    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     Serial.print("Setting soft-AP ... ");
     boolean result = WiFi.softAP("RGB_LEDs", "havealotoffun");
     if (result == true)
@@ -511,6 +539,11 @@ void setup()
     {
         Serial.println("Failed!");
     }
+    dnsServer.start(DNS_PORT, "*", apIP);
+
+    server.onNotFound([]() {
+    server.send(200, "text/html", main);
+    });
 
     server.on("/", []() {
         server.send_P(200, "text/html", main);
@@ -532,6 +565,7 @@ void setup()
 
 void loop()
 {
+    dnsServer.processNextRequest();
     webSocket.loop();
     server.handleClient();
     if(rainblow_flag){

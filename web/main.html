@@ -1,101 +1,99 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <style>
-        p {
-            font-size: 50px;
-            font-weight: bold;
-            background: -webkit-linear-gradient(92deg, #95d7e3, #eb76ff);
-            background-size: 50vw 50vw;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: textAnimate 2s linear infinite alternate;
-        }
-
-        @keyframes textAnimate {
-            from {
-                filter: hue-rotate(0deg);
-                background-position-x: 0%;
+    <head>
+        <style>
+            .unselectable {
+                font-size: 3vw;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
             }
 
-            to {
-                filter: hue-rotate(360deg);
-                background-position-x: 600vw;
+            .rainbow {
+                /* height: 55px; */
+                background-color: red;
+                /* For browsers that do not support gradients */
+                background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
             }
-        }
 
-        .center {
-            width: auto;
-            margin-left: auto;
-            margin-right: auto;
-        }
+            .center {
+                width: auto;
+                margin-left: auto;
+                margin-right: auto;
+            }
 
-        tr {
-            height: 20%;
-        }
+            tr {
+                height: 20%;
+            }
 
-        td {
-            width: 50%;
-            text-align: center;
-        }
+            td {
+                border-radius: 20px;
+                width: 50%;
+                text-align: center;
+            }
 
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-        }
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+            }
 
-        .full-height {
-            height: 100%;
-        }
-    </style>
+            .full-height {
+                height: 100%;
+            }
+        </style>
 
-    <script>
-        var Socket;
-        function init() {
-            Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
-            Socket.onmessage = function (event) {
-                console.log(event.data);
-            };
-        }
-        function rainbow_effect(){
-            Socket.send("rainbow");
-        }
-        function getColor(eid) {
-            t = document.getElementById(eid);
-            Socket.send(t.style.backgroundColor);
-        }
-    </script>
-</head>
+        <script>
+            var Socket;
+            function init() {
+                Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+                Socket.onmessage = function (event) {
+                    console.log(event.data);
+                };
+            }
+            function rainbow_effect() {
+                Socket.send("rainbow");
+            }
+            function getColor(eid) {
+                t = document.getElementById(eid);
+                Socket.send(t.style.backgroundColor);
+            }
+        </script>
+    </head>
 
-<body onload="javascript:init()">
-    <div class="full-height">
-        <table border="1" class="full-height center" style="width: 100%">
-            <tr >
-                <td id="Tomato" onclick="getColor('Tomato');" style="background-color: Tomato"></td>
-                <td id="Orange" onclick="getColor('Orange');" style="background-color: Orange"></td>
-            </tr>
-            <tr >
-                <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color: DodgerBlue"></td>
-                <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color: MediumSeaGreen">
-                </td>
-            </tr>
-            <tr >
-                <td id="Violet" onclick="getColor('Violet');" style="background-color: Violet"></td>
-                <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color: SlateBlue"></td>
-            </tr>
-            <tr >
-                <td id="White" onclick="getColor('White');" style="background-color: White"></td>
-                <td id="Black" onclick="getColor('Black');" style="background-color: Black"></td>
-            </tr>
-            <tr >
-                <td id="rainbow" onclick="rainbow_effect();" colspan="2">
-                    <p>Rainbow</p>
-                </td>
-            </tr>
-        </table>
-    </div>
-</body>
+    <body onload="javascript:init()">
+        <div class="full-height">
+            <table class="full-height center" style="width: 100%">
+                <tr>
+                    <td id="Tomato" onclick="getColor('Tomato');" style="background-color: Tomato"></td>
+                    <td id="Orange" onclick="getColor('Orange');" style="background-color: Orange"></td>
+                </tr>
+                <tr>
+                    <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color: DodgerBlue"></td>
+                    <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color: MediumSeaGreen"></td>
+                </tr>
+                <tr>
+                    <td id="Violet" onclick="getColor('Violet');" style="background-color: Violet"></td>
+                    <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color: SlateBlue"></td>
+                </tr>
+                <tr>
+                    <td id="White" onclick="getColor('White');" style="background-color: White; border: 2px solid;"></td>
+                    <td id="Black" onclick="getColor('Black');" style="background-color: Black"></td>
+                </tr>
+                <tr>
+                    <td class="rainbow" id="rainbow" onclick="rainbow_effect();"></td>
+                    <td onclick="function func(){window.location.assign('/slider')};func();" style="border: 2px solid;">
+                        <p class="unselectable">
+                            <span style="color:tomato">R</span><span style="color:mediumseagreen">G</span><span style="color:dodgerblue">B</span>
+                            Sliders</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </body>
 
 </html>
