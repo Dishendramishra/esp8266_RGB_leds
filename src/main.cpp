@@ -307,13 +307,27 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 #define NUM_OF_LEDS 15
 #define DATA_PIN 2     // PIN D4
-bool rainblow_flag = false;
+bool rainbow_flag = false;
 
 NeoPatterns LedStrip(15, 2, NEO_BRG + NEO_KHZ400, &LedStripComplete);
+
+char redirect[] PROGMEM = R"====(<html lang="en">
+<head>
+    <script>
+        function redirect(){
+            window.open("intent://192.168.1.1#Intent;scheme=http;package=com.android.chrome;end","_system");
+        }
+    </script>
+</head>
+<body onload="redirect()">
+    <button style="height: 100%; width: 100%; font-size: 100px;" onclick="redirect()">HOME</button>
+</body>
+</html>)====";
 
 char main[] PROGMEM = R"=====(<!DOCTYPE html><html> <head> <style> .unselectable { font-size: 3vw; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; } .rainbow { /* height: 55px; */ background-color: red; /* For browsers that do not support gradients */ background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); } .center { width: auto; margin-left: auto; margin-right: auto; } tr { height: 20%; } td { border-radius: 20px; width: 50%; text-align: center; } html, body { height: 100%; margin: 0; } .full-height { height: 100%; } </style> <script> var Socket; function init() { Socket = new WebSocket("ws://" + window.location.hostname + ":81/"); Socket.onmessage = function (event) { console.log(event.data); }; } function rainbow_effect() { Socket.send("rainbow"); } function getColor(eid) { t = document.getElementById(eid); Socket.send(t.style.backgroundColor); } </script> </head> <body onload="javascript:init()"> <div class="full-height"> <table class="full-height center" style="width: 100%"> <tr> <td id="Tomato" onclick="getColor('Tomato');" style="background-color: Tomato"></td> <td id="Orange" onclick="getColor('Orange');" style="background-color: Orange"></td> </tr> <tr> <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color: DodgerBlue"></td> <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color: MediumSeaGreen"></td> </tr> <tr> <td id="Violet" onclick="getColor('Violet');" style="background-color: Violet"></td> <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color: SlateBlue"></td> </tr> <tr> <td id="White" onclick="getColor('White');" style="background-color: White; border: 2px solid;"></td> <td id="Black" onclick="getColor('Black');" style="background-color: Black"></td> </tr> <tr> <td class="rainbow" id="rainbow" onclick="rainbow_effect();"></td> <td onclick="function func(){window.location.assign('/slider')};func();" style="border: 2px solid;"> <p class="unselectable"> <span style="color:tomato">R</span><span style="color:mediumseagreen">G</span><span style="color:dodgerblue">B</span> Sliders</p> </td> </tr> </table> </div> </body></html>)=====";
 char slider[] PROGMEM = R"=====(<!DOCTYPE html>
 <html>
+
 <head>
     <style>
         .unselectable {
@@ -427,8 +441,8 @@ char slider[] PROGMEM = R"=====(<!DOCTYPE html>
     function generateColor() {
         color = document.getElementById("pellete");
         color.style.background = "rgb(" + parseInt((red.value)).pad(3) + "," + (parseInt(blue.value)).pad(3) + "," + (parseInt(green.value)).pad(3) + ")";
-        Socket.send(parseInt((red.value)).pad(3) + "" + (parseInt(blue.value)).pad(3) + "" + (parseInt(green.value)).pad(3));
-        console.log(parseInt((red.value)).pad(3) + "" + (parseInt(blue.value)).pad(3) + "" + (parseInt(green.value)).pad(3));
+        Socket.send("(" + parseInt((red.value)).pad(3) + "," + (parseInt(blue.value)).pad(3) + "," + (parseInt(green.value)).pad(3) + ")");
+        console.log("(" + parseInt((red.value)).pad(3) + "," + (parseInt(blue.value)).pad(3) + "," + (parseInt(green.value)).pad(3) + ")");
     }
 </script>
 
@@ -447,6 +461,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
+            rainbow_flag = false;
         }
         else if (command == "orange")
         {
@@ -454,6 +469,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
+            rainbow_flag = false;
         }
         else if (command == "dodgerblue")
         {
@@ -461,6 +477,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
+            rainbow_flag = false;
         }
         else if (command == "mediumseagreen")
         {
@@ -468,6 +485,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
+            rainbow_flag = false;
         }
         else if (command == "violet")
         {
@@ -475,6 +493,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
+            rainbow_flag = false;
         }
         else if (command == "slateblue")
         {
@@ -482,6 +501,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
+            rainbow_flag = false;
         }
         else if (command == "white")
         {
@@ -489,6 +509,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
+            rainbow_flag = false;
         }
         else if (command == "black")
         {
@@ -496,22 +517,26 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
+            rainbow_flag = false;
         }
         else if(command == "rainbow"){
-            rainblow_flag = !rainblow_flag;
+            rainbow_flag = !rainbow_flag;
+            Serial.println("RGB effect");
         }
-        else
+        else if(command.startsWith("("))
         {
-            int colors = command.toInt();
-            int b = colors % 1000;
-            colors = colors / 1000;
-            int g = colors % 1000;
-            colors = colors / 1000;
-            Serial.println(colors);
-            Serial.println(g);
-            Serial.println(b);
-            LedStrip.fill(LedStrip.Color(colors, g, b),0,15);
+            rainbow_flag = false;
+            int firstcomma = command.indexOf(",");
+            int secondcomma = command.indexOf(",",firstcomma+1);
+
+            LedStrip.fill(LedStrip.Color(command.substring(1,firstcomma).toInt(), \
+                                         command.substring(firstcomma+1,secondcomma).toInt(), \
+                                        command.substring(secondcomma+1,secondcomma+4).toInt()),0,15);
             LedStrip.show();
+        }
+        else{
+            Serial.print("Uknown command: ");
+            Serial.println(command);
         }
     }
     else if (type == WStype_CONNECTED)
@@ -542,7 +567,7 @@ void setup()
     dnsServer.start(DNS_PORT, "*", apIP);
 
     server.onNotFound([]() {
-    server.send(200, "text/html", main);
+    server.send(200, "text/html", redirect);
     });
 
     server.on("/", []() {
@@ -568,7 +593,8 @@ void loop()
     dnsServer.processNextRequest();
     webSocket.loop();
     server.handleClient();
-    if(rainblow_flag){
+    if(rainbow_flag){
+        Serial.println("rgb updating");
         LedStrip.Update();
     }
 }

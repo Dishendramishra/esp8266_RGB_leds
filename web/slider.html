@@ -114,8 +114,8 @@
     function generateColor() {
         color = document.getElementById("pellete");
         color.style.background = "rgb(" + parseInt((red.value)).pad(3) + "," + (parseInt(blue.value)).pad(3) + "," + (parseInt(green.value)).pad(3) + ")";
-        Socket.send(parseInt((red.value)).pad(3) + "" + (parseInt(blue.value)).pad(3) + "" + (parseInt(green.value)).pad(3));
-        console.log(parseInt((red.value)).pad(3) + "" + (parseInt(blue.value)).pad(3) + "" + (parseInt(green.value)).pad(3));
+        Socket.send("(" + parseInt((red.value)).pad(3) + "," + (parseInt(blue.value)).pad(3) + "," + (parseInt(green.value)).pad(3) + ")");
+        console.log("(" + parseInt((red.value)).pad(3) + "," + (parseInt(blue.value)).pad(3) + "," + (parseInt(green.value)).pad(3) + ")");
     }
 </script>
 
