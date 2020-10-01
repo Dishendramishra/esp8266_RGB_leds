@@ -3,6 +3,7 @@
 #include <ESP8266WiFi.h>
 #include <WebSocketsServer.h>
 #include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
 #include <DNSServer.h>
 
 // Pattern types supported:
@@ -302,6 +303,7 @@ class NeoPatterns : public Adafruit_NeoPixel
 const byte DNS_PORT = 53;
 IPAddress apIP(192, 168, 1, 1);
 DNSServer dnsServer;
+MDNSResponder mdns;
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
@@ -565,7 +567,9 @@ void setup()
         Serial.println("Failed!");
     }
     dnsServer.start(DNS_PORT, "*", apIP);
-
+    if (mdns.begin("home",WiFi.localIP())){
+        Serial.println("MDNS Started!");
+    }
     server.onNotFound([]() {
     server.send(200, "text/html", redirect);
     });
@@ -582,6 +586,7 @@ void setup()
     webSocket.begin();
     webSocket.onEvent(webSocketEvent);
 
+    MDNS.addService("http","tcp",80);
     LedStrip.begin();
     LedStrip.RainbowCycle(7);
     LedStrip.fill(LedStrip.Color(0,0,0),0,15);
