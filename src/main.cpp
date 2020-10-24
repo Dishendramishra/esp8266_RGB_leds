@@ -307,11 +307,14 @@ MDNSResponder mdns;
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
-#define NUM_OF_LEDS 15
+#define NUM_OF_LEDS 24
 #define DATA_PIN 2     // PIN D4
 bool rainbow_flag = false;
+bool on_start = true;
 
-NeoPatterns LedStrip(15, 2, NEO_BRG + NEO_KHZ400, &LedStripComplete);
+// NeoPatterns LedStrip(NUM_OF_LEDS, DATA_PIN, NEO_BRG + NEO_KHZ400, &LedStripComplete);  // SM16703
+NeoPatterns LedStrip(NUM_OF_LEDS, DATA_PIN, NEO_GRB + NEO_KHZ800, &LedStripComplete);     // WS2812
+
 
 char redirect[] PROGMEM = R"====(<html lang="en">
 <head>
@@ -326,7 +329,7 @@ char redirect[] PROGMEM = R"====(<html lang="en">
 </body>
 </html>)====";
 
-char main[] PROGMEM = R"=====(<!DOCTYPE html><html> <head> <style> .unselectable { font-size: 3vw; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; } .rainbow { /* height: 55px; */ background-color: red; /* For browsers that do not support gradients */ background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); } .center { width: auto; margin-left: auto; margin-right: auto; } tr { height: 20%; } td { border-radius: 20px; width: 50%; text-align: center; } html, body { height: 100%; margin: 0; } .full-height { height: 100%; } </style> <script> var Socket; function init() { Socket = new WebSocket("ws://" + window.location.hostname + ":81/"); Socket.onmessage = function (event) { console.log(event.data); }; } function rainbow_effect() { Socket.send("rainbow"); } function getColor(eid) { t = document.getElementById(eid); Socket.send(t.style.backgroundColor); } </script> </head> <body onload="javascript:init()"> <div class="full-height"> <table class="full-height center" style="width: 100%"> <tr> <td id="Tomato" onclick="getColor('Tomato');" style="background-color: Tomato"></td> <td id="Orange" onclick="getColor('Orange');" style="background-color: Orange"></td> </tr> <tr> <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color: DodgerBlue"></td> <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color: MediumSeaGreen"></td> </tr> <tr> <td id="Violet" onclick="getColor('Violet');" style="background-color: Violet"></td> <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color: SlateBlue"></td> </tr> <tr> <td id="White" onclick="getColor('White');" style="background-color: White; border: 2px solid;"></td> <td id="Black" onclick="getColor('Black');" style="background-color: Black"></td> </tr> <tr> <td class="rainbow" id="rainbow" onclick="rainbow_effect();"></td> <td onclick="function func(){window.location.assign('/slider')};func();" style="border: 2px solid;"> <p class="unselectable"> <span style="color:tomato">R</span><span style="color:mediumseagreen">G</span><span style="color:dodgerblue">B</span> Sliders</p> </td> </tr> </table> </div> </body></html>)=====";
+char main[] PROGMEM = R"=====(<!DOCTYPE html><html><head> <style> .unselectable { -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; } .rainbow_text { background-image: -webkit-gradient(linear, left top, right top, color-stop(0, #f22), color-stop(0.15, #f2f), color-stop(0.3, #22f), color-stop(0.45, #2ff), color-stop(0.6, #2f2), color-stop(0.75, #2f2), color-stop(0.9, #ff2), color-stop(1, #f22)); background-image: gradient(linear, left top, right top, color-stop(0, #f22), color-stop(0.15, #f2f), color-stop(0.3, #22f), color-stop(0.45, #2ff), color-stop(0.6, #2f2), color-stop(0.75, #2f2), color-stop(0.9, #ff2), color-stop(1, #f22)); color: transparent; -webkit-background-clip: text; background-clip: text; -webkit-text-stroke-width: 0.5px; -webkit-text-stroke-color: black; } .rainbow { /* height: 55px; */ background-color: red; /* For browsers that do not support gradients */ background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); } .center { width: auto; margin-left: auto; margin-right: auto; } tr { height: 16%; } td { border-radius: 20px; width: 50%; text-align: center; font-size: 5vh; } html, body { height: 100%; margin: 0; } .full-height { height: 100%; } </style> <script> var Socket; function init() { Socket = new WebSocket("ws://" + window.location.hostname + ":81/"); Socket.onmessage = function (event) { console.log(event.data); }; } function rainbow_effect() { Socket.send("rainbow"); } function getColor(eid) { t = document.getElementById(eid); Socket.send(t.style.backgroundColor); } </script></head><body onload="javascript:init()"> <div class="full-height"> <table class="full-height center" style="width: 100%"> <tr> <td id="Tomato" onclick="getColor('Tomato');" style="background-color: Tomato"></td> <td id="Orange" onclick="getColor('Orange');" style="background-color: Orange"></td> </tr> <tr> <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color: DodgerBlue"></td> <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color: MediumSeaGreen"> </td> </tr> <tr> <td id="Violet" onclick="getColor('Violet');" style="background-color: Violet"></td> <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color: SlateBlue"></td> </tr> <tr> <td id="White" onclick="getColor('White');" style="background-color: White; border: 2px solid;"></td> <td id="Black" onclick="getColor('Black');" style="background-color: Black"></td> </tr> <tr> <td class="rainbow" id="rainbow" onclick="rainbow_effect();"></td> <td onclick="function func(){window.location.assign('/slider')};func();" style="border: 2px solid;"> <p class="unselectable"> <span style="color:tomato">R</span><span style="color:mediumseagreen">G</span><span style="color:dodgerblue">B</span> </p> </td> </tr> <tr> <td></td> <td onclick="function func(){window.location.assign('/colorwheel')};func();" style="border: 2px solid;"> <p class="unselectable"><span class="rainbow_text">Color Wheel</span></p> </td> </tr> </table> </div></body></html>)=====";
 char slider[] PROGMEM = R"=====(<!DOCTYPE html>
 <html>
 
@@ -450,6 +453,131 @@ char slider[] PROGMEM = R"=====(<!DOCTYPE html>
 
 </html>)=====";
 
+char colorwheel[] PROGMEM = R"=====(<html>
+
+<head></head>
+
+<body onload="init()">
+    <script>
+
+        var Socket;
+
+        function init() {
+            Socket = new WebSocket('ws://' + window.location.hostname + ':81/');
+            Socket.onmessage = function (event) {
+                console.log(event.data);
+            }
+        }
+
+        Number.prototype.pad = function (size) {
+            var s = String(this);
+            while (s.length < (size || 2)) { s = "0" + s; }
+            return s;
+        }
+
+        function degreesToRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+
+        function generateColorWheel(size, centerColor) {
+            if (size === void 0) { size = 400; }
+            if (centerColor === void 0) { centerColor = "white"; }
+            /*Generate main canvas to return*/
+            var canvas = document.createElement("canvas");
+            var ctx = canvas.getContext("2d");
+            canvas.width = canvas.height = size;
+            /*Generate canvas clone to draw increments on*/
+            var canvasClone = document.createElement("canvas");
+            canvasClone.width = canvasClone.height = size;
+            var canvasCloneCtx = canvasClone.getContext("2d");
+            /*Initiate variables*/
+            var angle = 0;
+            var hexCode = [255, 0, 0];
+            var pivotPointer = 0;
+            var colorOffsetByDegree = 4.322;
+            /*For each degree in circle, perform operation*/
+            while (angle++ < 360) {
+                /*find index immediately before and after our pivot*/
+                var pivotPointerbefore = (pivotPointer + 3 - 1) % 3;
+                var pivotPointerAfter = (pivotPointer + 3 + 1) % 3;
+                /*Modify colors*/
+                if (hexCode[pivotPointer] < 255) {
+                    /*If main points isn't full, add to main pointer*/
+                    hexCode[pivotPointer] = (hexCode[pivotPointer] + colorOffsetByDegree > 255 ? 255 : hexCode[pivotPointer] + colorOffsetByDegree);
+                }
+                else if (hexCode[pivotPointerbefore] > 0) {
+                    /*If color before main isn't zero, subtract*/
+                    hexCode[pivotPointerbefore] = (hexCode[pivotPointerbefore] > colorOffsetByDegree ? hexCode[pivotPointerbefore] - colorOffsetByDegree : 0);
+                }
+                else if (hexCode[pivotPointer] >= 255) {
+                    /*If main color is full, move pivot*/
+                    hexCode[pivotPointer] = 255;
+                    pivotPointer = (pivotPointer + 1) % 3;
+                }
+                /*clear clone*/
+                canvasCloneCtx.clearRect(0, 0, size, size);
+                /*Generate gradient and set as fillstyle*/
+                var grad = canvasCloneCtx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+                grad.addColorStop(0, centerColor);
+                grad.addColorStop(1, "rgb(" + hexCode.map(function (h) { return Math.floor(h); }).join(",") + ")");
+                canvasCloneCtx.fillStyle = grad;
+                /*draw full circle with new gradient*/
+                canvasCloneCtx.globalCompositeOperation = "source-over";
+                canvasCloneCtx.beginPath();
+                canvasCloneCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+                canvasCloneCtx.closePath();
+                canvasCloneCtx.fill();
+                /*Switch to "Erase mode"*/
+                canvasCloneCtx.globalCompositeOperation = "destination-out";
+                /*Carve out the piece of the circle we need for this angle*/
+                canvasCloneCtx.beginPath();
+                canvasCloneCtx.arc(size / 2, size / 2, 0, degreesToRadians(angle + 1), degreesToRadians(angle + 1));
+                canvasCloneCtx.arc(size / 2, size / 2, size / 2 + 1, degreesToRadians(angle + 1), degreesToRadians(angle + 1));
+                canvasCloneCtx.arc(size / 2, size / 2, size / 2 + 1, degreesToRadians(angle + 1), degreesToRadians(angle - 1));
+                canvasCloneCtx.arc(size / 2, size / 2, 0, degreesToRadians(angle + 1), degreesToRadians(angle - 1));
+                canvasCloneCtx.closePath();
+                canvasCloneCtx.fill();
+                /*Draw carved-put piece on main canvas*/
+                ctx.drawImage(canvasClone, 0, 0);
+            }
+            /*return main canvas*/
+            return canvas;
+        }
+        /*TEST*/
+        /*Get color wheel canvas*/
+        if(window.innerHeight > window.innerWidth)
+            var colorWheel = generateColorWheel(window.innerWidth);
+        else
+            var colorWheel = generateColorWheel(window.innerHeight);
+        /*Add color wheel canvas to document*/
+        document.body.appendChild(colorWheel);
+        /*Add ouput field*/
+        var p = document.body.appendChild(document.createElement("p"));
+        /**
+         * colorWheelMouse
+         *
+         * @param {MouseEvent} evt
+         */
+        function colorWheelMouse(evt) {
+            var ctx = colorWheel.getContext("2d");
+            var data = ctx.getImageData(evt.offsetX, evt.offsetY, 1, 1);
+            p.innerHTML = "RGB: " + data.data.slice(0, 3).join(',');
+            try {
+                Socket.send("(" + data.data.slice(0, 3).join(',') + ")");
+            }
+            catch (err) {
+                console.log("404");
+            }
+            console.log("(" + data.data.slice(0, 3).join(',') + ")");
+        }
+        /*Bind mouse event*/
+        // colorWheel.ontouchmove = colorWheelMouse;
+        colorWheel.onclick = colorWheelMouse;
+    </script>
+</body>
+
+</html>)=====";
+
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 {
     if (type == WStype_TEXT)
@@ -459,7 +587,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 
         if (command == "tomato")
         {
-            LedStrip.fill(LedStrip.Color(255,0,0),0,15);
+            LedStrip.fill(LedStrip.Color(255,0,0),0,NUM_OF_LEDS);
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
@@ -467,7 +595,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         }
         else if (command == "orange")
         {
-            LedStrip.fill(LedStrip.Color(255,165,0),0,15);
+            LedStrip.fill(LedStrip.Color(255,165,0),0,NUM_OF_LEDS);
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
@@ -475,7 +603,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         }
         else if (command == "dodgerblue")
         {
-            LedStrip.fill(LedStrip.Color(0,0,255),0,15);
+            LedStrip.fill(LedStrip.Color(0,0,255),0,NUM_OF_LEDS);
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
@@ -483,7 +611,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         }
         else if (command == "mediumseagreen")
         {
-            LedStrip.fill(LedStrip.Color(0,255,0),0,15);
+            LedStrip.fill(LedStrip.Color(0,255,0),0,NUM_OF_LEDS);
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
@@ -491,7 +619,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         }
         else if (command == "violet")
         {
-            LedStrip.fill(LedStrip.Color(255, 0, 51),0,15);
+            LedStrip.fill(LedStrip.Color(255, 0, 51),0,NUM_OF_LEDS);
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
@@ -499,7 +627,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         }
         else if (command == "slateblue")
         {
-            LedStrip.fill(LedStrip.Color(153, 0, 255),0,15);
+            LedStrip.fill(LedStrip.Color(153, 0, 255),0,NUM_OF_LEDS);
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
@@ -507,7 +635,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         }
         else if (command == "white")
         {
-            LedStrip.fill(LedStrip.Color(255,255,255),0,15);
+            LedStrip.fill(LedStrip.Color(255,255,255),0,NUM_OF_LEDS);
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
@@ -515,7 +643,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         }
         else if (command == "black")
         {
-            LedStrip.fill(LedStrip.Color(0,0,0),0,15);
+            LedStrip.fill(LedStrip.Color(0,0,0),0,NUM_OF_LEDS);
             LedStrip.show();
             Serial.print("Color: ");
             Serial.println(command);
@@ -533,7 +661,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 
             LedStrip.fill(LedStrip.Color(command.substring(1,firstcomma).toInt(), \
                                          command.substring(firstcomma+1,secondcomma).toInt(), \
-                                        command.substring(secondcomma+1,secondcomma+4).toInt()),0,15);
+                                        command.substring(secondcomma+1,secondcomma+4).toInt()),0,NUM_OF_LEDS);
             LedStrip.show();
         }
         else{
@@ -582,6 +710,10 @@ void setup()
         server.send_P(200, "text/html", slider);
     });
 
+    server.on("/colorwheel", []() {
+        server.send_P(200, "text/html", colorwheel);
+    });
+
     server.begin();
     webSocket.begin();
     webSocket.onEvent(webSocketEvent);
@@ -589,12 +721,23 @@ void setup()
     MDNS.addService("http","tcp",80);
     LedStrip.begin();
     LedStrip.RainbowCycle(7);
-    LedStrip.fill(LedStrip.Color(0,0,0),0,15);
-    LedStrip.show();
+    LedStrip.setBrightness(20);
+    rainbow_flag = false;
 }
 
 void loop()
 {
+    if(on_start){
+        //LedStrip.fill(LedStrip.Color(0,0,0),5,NUM_OF_LEDS);
+        // Ltrip.show();
+
+        for(int i=0; i<=NUM_OF_LEDS; i++){
+            LedStrip.setPixelColor(i,0,0,0);
+            LedStrip.show();
+        }
+        on_start = false;
+        Serial.println("Turning Strip OFF!");
+    }
     dnsServer.processNextRequest();
     webSocket.loop();
     server.handleClient();

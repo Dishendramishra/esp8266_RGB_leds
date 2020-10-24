@@ -1,99 +1,117 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <style>
-            .unselectable {
-                font-size: 3vw;
-                -webkit-touch-callout: none;
-                -webkit-user-select: none;
-                -khtml-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-            }
+<head>
+    <style>
+        .unselectable {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
 
-            .rainbow {
-                /* height: 55px; */
-                background-color: red;
-                /* For browsers that do not support gradients */
-                background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
-            }
+        .rainbow_text {
+            background-image: -webkit-gradient(linear, left top, right top, color-stop(0, #f22), color-stop(0.15, #f2f), color-stop(0.3, #22f), color-stop(0.45, #2ff), color-stop(0.6, #2f2), color-stop(0.75, #2f2), color-stop(0.9, #ff2), color-stop(1, #f22));
+            background-image: gradient(linear, left top, right top, color-stop(0, #f22), color-stop(0.15, #f2f), color-stop(0.3, #22f), color-stop(0.45, #2ff), color-stop(0.6, #2f2), color-stop(0.75, #2f2), color-stop(0.9, #ff2), color-stop(1, #f22));
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-stroke-width: 0.5px;
+            -webkit-text-stroke-color: black;
+        }
 
-            .center {
-                width: auto;
-                margin-left: auto;
-                margin-right: auto;
-            }
+        .rainbow {
+            /* height: 55px; */
+            background-color: red;
+            /* For browsers that do not support gradients */
+            background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+        }
 
-            tr {
-                height: 20%;
-            }
+        .center {
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-            td {
-                border-radius: 20px;
-                width: 50%;
-                text-align: center;
-            }
+        tr {
+            height: 16%;
+        }
 
-            html,
-            body {
-                height: 100%;
-                margin: 0;
-            }
+        td {
+            border-radius: 20px;
+            width: 50%;
+            text-align: center;
+            font-size: 5vh;
+        }
 
-            .full-height {
-                height: 100%;
-            }
-        </style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
 
-        <script>
-            var Socket;
-            function init() {
-                Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
-                Socket.onmessage = function (event) {
-                    console.log(event.data);
-                };
-            }
-            function rainbow_effect() {
-                Socket.send("rainbow");
-            }
-            function getColor(eid) {
-                t = document.getElementById(eid);
-                Socket.send(t.style.backgroundColor);
-            }
-        </script>
-    </head>
+        .full-height {
+            height: 100%;
+        }
+    </style>
 
-    <body onload="javascript:init()">
-        <div class="full-height">
-            <table class="full-height center" style="width: 100%">
-                <tr>
-                    <td id="Tomato" onclick="getColor('Tomato');" style="background-color: Tomato"></td>
-                    <td id="Orange" onclick="getColor('Orange');" style="background-color: Orange"></td>
-                </tr>
-                <tr>
-                    <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color: DodgerBlue"></td>
-                    <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color: MediumSeaGreen"></td>
-                </tr>
-                <tr>
-                    <td id="Violet" onclick="getColor('Violet');" style="background-color: Violet"></td>
-                    <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color: SlateBlue"></td>
-                </tr>
-                <tr>
-                    <td id="White" onclick="getColor('White');" style="background-color: White; border: 2px solid;"></td>
-                    <td id="Black" onclick="getColor('Black');" style="background-color: Black"></td>
-                </tr>
-                <tr>
-                    <td class="rainbow" id="rainbow" onclick="rainbow_effect();"></td>
-                    <td onclick="function func(){window.location.assign('/slider')};func();" style="border: 2px solid;">
-                        <p class="unselectable">
-                            <span style="color:tomato">R</span><span style="color:mediumseagreen">G</span><span style="color:dodgerblue">B</span>
-                            Sliders</p>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </body>
+    <script>
+        var Socket;
+        function init() {
+            Socket = new WebSocket("ws://" + window.location.hostname + ":81/");
+            Socket.onmessage = function (event) {
+                console.log(event.data);
+            };
+        }
+        function rainbow_effect() {
+            Socket.send("rainbow");
+        }
+        function getColor(eid) {
+            t = document.getElementById(eid);
+            Socket.send(t.style.backgroundColor);
+        }
+    </script>
+</head>
+
+<body onload="javascript:init()">
+    <div class="full-height">
+        <table class="full-height center" style="width: 100%">
+            <tr>
+                <td id="Tomato" onclick="getColor('Tomato');" style="background-color: Tomato"></td>
+                <td id="Orange" onclick="getColor('Orange');" style="background-color: Orange"></td>
+            </tr>
+            <tr>
+                <td id="DodgerBlue" onclick="getColor('DodgerBlue');" style="background-color: DodgerBlue"></td>
+                <td id="MediumSeaGreen" onclick="getColor('MediumSeaGreen');" style="background-color: MediumSeaGreen">
+                </td>
+            </tr>
+            <tr>
+                <td id="Violet" onclick="getColor('Violet');" style="background-color: Violet"></td>
+                <td id="SlateBlue" onclick="getColor('SlateBlue');" style="background-color: SlateBlue"></td>
+            </tr>
+            <tr>
+                <td id="White" onclick="getColor('White');" style="background-color: White; border: 2px solid;"></td>
+                <td id="Black" onclick="getColor('Black');" style="background-color: Black"></td>
+            </tr>
+            <tr>
+                <td class="rainbow" id="rainbow" onclick="rainbow_effect();"></td>
+                <td onclick="function func(){window.location.assign('/slider')};func();" style="border: 2px solid;">
+                    <p class="unselectable">
+                        <span style="color:tomato">R</span><span style="color:mediumseagreen">G</span><span
+                            style="color:dodgerblue">B</span>
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td onclick="function func(){window.location.assign('/colorwheel')};func();" style="border: 2px solid;">
+                    <p class="unselectable"><span class="rainbow_text">Color Wheel</span></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
 
 </html>
